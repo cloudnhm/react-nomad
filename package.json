@@ -57,5 +57,5 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/styled-components": "^5.1.34"
   },
-  "homepage": "https://cloudnhm.github.io/nomad-react"
+  "homepage": "https://cloudnhm.github.io/react-nomad"
 }
