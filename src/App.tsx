@@ -1,77 +1,127 @@
-import { createGlobalStyle } from "styled-components";
-import ToDoList from "./components/ToDoList";
+import styled from "styled-components";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
-const GlobalStyle = createGlobalStyle`
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap');
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, menu, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-main, menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font-size: 100%;
-  font: inherit;
-  vertical-align: baseline;
-}
-/* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure,
-footer, header, hgroup, main, menu, nav, section {
-  display: block;
-}
-/* HTML5 hidden-attribute fix for newer browsers */
-*[hidden] {
-    display: none;
-}
-body {
-  line-height: 1;
-}
-menu, ol, ul {
-  list-style: none;
-}
-blockquote, q {
-  quotes: none;
-}
-blockquote:before, blockquote:after,
-q:before, q:after {
-  content: '';
-  content: none;
-}
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-* {
-  box-sizing: border-box;
-}
-body {
-  font-weight: 300;
-  font-family: 'Source Sans Pro', sans-serif;
-  background-color:${(props) => props.theme.bgColor};
-  color:${(props) => props.theme.textColor};
-  line-height: 1.2;
-}
-a {
-  text-decoration:none;
-  color:inherit;
-}
+const Wrapper = styled.div`
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to right, #c84e89, #F15F79);
+  flex-direction: column;
 `;
 
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  width: 50vw;
+  gap: 10px;
+`;
+
+const Box = styled(motion.div)`
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 40px;
+  height: 200px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+`;
+
+const Overlay = styled(motion.div)`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const overlay = {
+  hidden: { backgroundColor: "rgba(0, 0, 0, 0)" },
+  visible: { backgroundColor: "rgba(0, 0, 0, 0.5)" },
+  exit: { backgroundColor: "rgba(0, 0, 0, 0)" },
+};
+
+const hoverEffects: { [key: string]: { originX: number; originY: number } } = {
+  "1": { originX: 1, originY: 1 },
+  "2": { originX: 0, originY: 1 },
+  "3": { originX: 1, originY: 0 },
+  "4": { originX: 0, originY: 0 },
+};
+
+const ToggleButton = styled.button`
+  width: 100px;
+  height: 50px;
+  background-color: #eee;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  margin-top: 40px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-size: 12px;
+`;
+
+const ToggleIndicator = styled(motion.div)`
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border-radius: 50%;
+  position: absolute;
+`;
+
+const CircleChild = styled(motion.div)`
+  width: 30px;
+  height: 30px;
+  border-radius: 30px;
+  background-color: #fff;
+`
+
+const toggleVariants = {
+  on: { x: 25 },
+  off: { x: -25 },
+};
+
 function App() {
+  const [id, setId] = useState<null | string>(null);
+  const [toggle, setToggle] = useState(false);
+
   return (
-    <>
-      <GlobalStyle />
-      <ToDoList />
-    </>
+    <Wrapper>
+      <Grid>
+        {["1", "2", "3", "4"].map((n) => (
+          <Box onClick={() => setId(n)} key={n} layoutId={n} whileHover={{ scale: 1.1, ...hoverEffects[n],  }}>
+            {toggle && n === "2" && <CircleChild />}
+            {!toggle && n === "3" && <CircleChild />}
+          </Box>
+        ))}
+      </Grid>
+      <ToggleButton onClick={() => setToggle(!toggle)}>
+        {toggle ? "ON" : "OFF"}
+        <ToggleIndicator
+          variants={toggleVariants}
+          animate={toggle ? "on" : "off"}
+        />
+      </ToggleButton>
+      <AnimatePresence>
+        {id ? (
+          <Overlay
+            variants={overlay}
+            onClick={() => setId(null)}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <Box layoutId={id} style={{ width: 400, height: 200 }} />
+          </Overlay>
+        ) : null}
+      </AnimatePresence>
+    </Wrapper>
   );
 }
 
